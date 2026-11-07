@@ -1,0 +1,1 @@
+import http from 'node:http';import fs from 'node:fs';http.createServer((req,res)=>{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({fixture:'nas161-auto',url:fs.readFileSync('public-url.txt','utf8')}))}).listen(Number(process.env.PORT || 3000),'0.0.0.0');

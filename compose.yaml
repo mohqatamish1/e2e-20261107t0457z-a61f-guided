@@ -1,0 +1,34 @@
+services:
+  frontend:
+    build: frontend
+    ports: ["3000:3000"]
+    environment:
+      INTERNAL_API_URL: ${INTERNAL_API_URL}
+    depends_on: [backend]
+  backend:
+    build: backend
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      RUNTIME_REQUIRED: ${RUNTIME_REQUIRED}
+    depends_on:
+      db: {condition: service_healthy}
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fixture
+      POSTGRES_DB: fixture
+      POSTGRES_PASSWORD: dummy-nas161-password
+    volumes: ["data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U fixture -d fixture']
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  tests:
+    image: python:3.12-alpine
+    command: [python, -c, "print('excluded test fixture')"]
+    profiles: [test]
+    environment: {DATABASE_URL: postgres://db/fixture}
+    depends_on: [db]
+volumes: {data: {}}
